@@ -6,7 +6,7 @@ print("Hello word this is: FIRE DETECTOR!")
 import cv2
 import time
 from ultralytics import YOLO
-modelo=YOLO('best60epocas.pt') #cargo el modelo entrenado
+modelo=YOLO('Models/best60epocas.pt') #cargo el modelo entrenado
 
 
 
