@@ -1,7 +1,7 @@
 # Para instalar el backend
 ## Desde la raiz: 
 * python3 -m venv venv
-* .\venv\Scripts\Activate.ps1 # al menos el windows
+* .\venv\Scripts\Activate.ps1 # al menos en windows
 * pip install uvicorn
 
 ## Desde /backend
