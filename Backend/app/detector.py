@@ -26,11 +26,18 @@ class FireDetector:
         return detections
 
     def draw_detections(self, image: np.ndarray, detections: list):
+
+        class_colors = {
+            "fire": (0, 0, 255),       # Rojo
+            "smoke": (128, 128, 128),    # Gris
+            "other": (0, 255, 0),     # Verde
+        }
         for detection in detections:
             x1, y1, x2, y2 = detection["bbox"]
             class_name = detection["class"]
             confidence = detection["confidence"]
-            cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            color=class_colors.get(class_name)
+            cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
             texto = f"{class_name} ({confidence:.2f})"
-            cv2.putText(image, texto, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            cv2.putText(image, texto, (x1+5, y1+15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         return image
