@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 
 const VideoSection = ({ sectionRef }) => {
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
+  const [analysisResult, setAnalysisResult] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const videoRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -14,28 +16,31 @@ const VideoSection = ({ sectionRef }) => {
   const handleVideoUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedVideo(URL.createObjectURL(file));
+      setVideoFile(file); 
+      setSelectedVideo(URL.createObjectURL(file)); 
+      setAnalysisResult(null); 
     }
   };
 
   const analyzeVideo = async () => {
-  if (!fileInputRef.current.files[0]) return;
+  if (!videoFile) return;
 
   setIsAnalyzing(true);
   const formData = new FormData();
-  formData.append("file", fileInputRef.current.files[0]);
+  formData.append("file", videoFile);
+  formData.append("confidence", confidence);
+  formData.append("cant_frames", frameCount);
 
   try {
-    const response = await fetch("http://localhost:8001/predict/video/", {
+    const response = await fetch("http://127.0.0.1:8001/predict/video/", {
       method: "POST",
       body: formData,
     });
 
     if (!response.ok) throw new Error("Error en la respuesta del servidor");
 
-    const blob = await response.blob();
-    const videoUrl = URL.createObjectURL(blob);
-    setSelectedVideo(videoUrl);
+    const data = await response.json();
+    setAnalysisResult(data);
   } catch (error) {
     console.error("Error al analizar el video:", error);
     alert("Ocurrió un error al analizar el video.");
@@ -102,6 +107,13 @@ const VideoSection = ({ sectionRef }) => {
             >
               {selectedVideo ? 'Cambiar Video' : 'Seleccionar Video'}
             </button>
+            <input 
+                ref={fileInputRef}
+                type="file" 
+                accept="video/*" 
+                className="hidden" 
+                onChange={handleVideoUpload} 
+              />
             
             <button
               onClick={analyzeVideo}
@@ -128,13 +140,6 @@ const VideoSection = ({ sectionRef }) => {
               >
                 Seleccionar archivo
               </button>
-              <input 
-                ref={fileInputRef}
-                type="file" 
-                accept="video/*" 
-                className="hidden" 
-                onChange={handleVideoUpload} 
-              />
             </div>
           )}
         </div>
