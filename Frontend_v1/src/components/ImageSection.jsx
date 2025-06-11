@@ -48,6 +48,13 @@ const ImageSection = ({ sectionRef }) => {
     <section ref={sectionRef} className="min-h-screen w-full bg-gray-800 flex flex-col md:flex-row">
       <div className="w-full md:w-1/2 h-96 md:h-auto flex items-center justify-center p-8 bg-gray-900">
         <div className="w-full h-full max-w-2xl flex items-center justify-center border-2 border-dashed border-gray-600 rounded-lg overflow-hidden">
+          <input 
+                ref={fileInputRef}
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                onChange={handleImageUpload} 
+              />
           {selectedImage ? (
             <img src={selectedImage} alt="Preview" className="w-full h-full object-contain" />
           ) : (
@@ -59,13 +66,6 @@ const ImageSection = ({ sectionRef }) => {
               >
                 Seleccionar archivo
               </button>
-              <input 
-                ref={fileInputRef}
-                type="file" 
-                accept="image/*" 
-                className="hidden" 
-                onChange={handleImageUpload} 
-              />
             </div>
           )}
         </div>
