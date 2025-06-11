@@ -18,16 +18,24 @@ class FireDetector:
         return results  # directamente devolvés el result  
     
     def dibujar_anotaciones(self,frame, result):
+         
+         class_colors = {
+            "fire": (255, 0, 0),       # azul
+            "smoke": (128, 128, 128),    # Gris
+            "other": (0, 255, 0),     # Verde
+          }
          for box in result.boxes:
              x1, y1, x2, y2 = map(int, box.xyxy[0])
              clase_id = int(box.cls[0])
              conf = float(box.conf[0])
              nombre_clase = self.names.get(clase_id)
-
-             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+             color=class_colors.get(nombre_clase)
+            
+             cv2.rectangle(frame, (x1, y1), (x2, y2), color , 10)
              texto = f"{nombre_clase} ({conf:.2f})"
-             cv2.putText(frame, texto, (x1, y1 - 10),
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+             cv2.putText(frame, texto, (x1, y1 - 20),
+                   cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 10)
+             
          return frame
          
          
