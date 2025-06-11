@@ -1,94 +1,57 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 
-const WebcamSection = ({ sectionRef }) => {
-  const [isActive, setIsActive] = useState(false);
+const VideoSection = ({ sectionRef }) => {
+  const [selectedVideo, setSelectedVideo] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const videoRef = useRef(null);
-  const streamRef = useRef(null);
+  const fileInputRef = useRef(null);
+
   const [confidence, setConfidence] = useState(0.5);
   const [frameCount, setFrameCount] = useState(5);
   const [resolution, setResolution] = useState("720p");
   const [outputUrl, setOutputUrl] = useState(null);
 
-
-  const startWebcam = async () => {
-    try {
-      const { width, height } = resolutionMap[resolution];
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width, height }
-      });
-      streamRef.current = stream;
-      setIsActive(true);
-    } catch (err) {
-      console.error("Error al acceder a la webcam:", err);
-      alert("No se pudo acceder a la webcam. Asegúrate de permitir el acceso.");
+  const handleVideoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedVideo(URL.createObjectURL(file));
     }
   };
 
-  useEffect(() => {
-    if (isActive && streamRef.current && videoRef.current) {
-      videoRef.current.srcObject = streamRef.current;
-    }
-  }, [isActive]);
+  const analyzeVideo = async () => {
+  if (!fileInputRef.current.files[0]) return;
 
-  const stopWebcam = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-      setIsActive(false);
-    }
-  };
+  setIsAnalyzing(true);
+  const formData = new FormData();
+  formData.append("file", fileInputRef.current.files[0]);
 
-  const analyzeWebcam = async () => {
-    setIsAnalyzing(true);
-    try {
-      const response = await fetch("http://localhost:8001/predict/camera/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          confidence: confidence,
-          frames: frameCount
-        }),
-      });
+  try {
+    const response = await fetch("http://localhost:8001/predict/video/", {
+      method: "POST",
+      body: formData,
+    });
 
-      if (!response.ok) throw new Error("Error al analizar el stream");
+    if (!response.ok) throw new Error("Error en la respuesta del servidor");
 
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      setOutputUrl(url);
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Ocurrió un error al analizar el stream.");
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      if (streamRef.current) {
-        stopWebcam();
-      }
-    };
-  }, []);
+    const blob = await response.blob();
+    const videoUrl = URL.createObjectURL(blob);
+    setSelectedVideo(videoUrl);
+  } catch (error) {
+    console.error("Error al analizar el video:", error);
+    alert("Ocurrió un error al analizar el video.");
+  } finally {
+    setIsAnalyzing(false);
+  }
+};
 
   return (
     <section ref={sectionRef} className="min-h-screen w-full bg-gray-800 flex flex-col md:flex-row">
-      <div className="w-full md:w-1/2 h-96 md:h-auto flex items-center justify-center p-8 bg-gray-900">
-        <div className="w-full h-full max-w-2xl bg-black rounded-lg overflow-hidden flex items-center justify-center">
-          {isActive ? (
-            <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
-          ) : (
-            <p className="text-gray-400">Webcam inactiva</p>
-          )}
-        </div>
-      </div>
-      
-      <div className="w-full md:w-1/2 flex items-center justify-center p-8">
+      {/* Controles - Mitad izquierda (orden invertido) */}
+      <div className="w-full md:w-1/2 flex items-center justify-center p-8 order-1 md:order-1">
         <div className="max-w-md w-full space-y-6">
-          <h2 className="text-2xl font-bold text-white">Analizar Webcam</h2>
+          <h2 className="text-2xl font-bold text-white">Analizar Video</h2>
           <p className="text-gray-300">
-            Activa tu webcam para detectar incendios en tiempo real usando nuestro modelo de IA.
+            Sube un video para detectar posibles incendios en tiempo real usando nuestro modelo de IA.
           </p>
           
           <div className="space-y-4">
@@ -132,34 +95,52 @@ const WebcamSection = ({ sectionRef }) => {
               <option value="720p">720p</option>
               <option value="1080p">1080p</option>
             </select>
-
+            
             <button
-              onClick={isActive ? stopWebcam : startWebcam}
-              className={`w-full px-6 py-3 rounded-lg font-medium ${isActive ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700'} text-white transition-colors`}
+              onClick={() => fileInputRef.current.click()}
+              className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
-              {isActive ? 'Detener Webcam' : 'Activar Webcam'}
+              {selectedVideo ? 'Cambiar Video' : 'Seleccionar Video'}
             </button>
             
             <button
-              onClick={analyzeWebcam}
-              disabled={!isActive || isAnalyzing}
-              className={`w-full px-6 py-3 rounded-lg font-medium ${isActive && !isAnalyzing ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-600 cursor-not-allowed'} text-white transition-colors`}
+              onClick={analyzeVideo}
+              disabled={!selectedVideo || isAnalyzing}
+              className={`w-full px-6 py-3 rounded-lg font-medium ${selectedVideo && !isAnalyzing ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-600 cursor-not-allowed'} text-white transition-colors`}
             >
               {isAnalyzing ? 'Analizando...' : 'Detectar Fuego'}
             </button>
-
-            {outputUrl && (
-              <video
-                src={outputUrl}
-                controls
-                className="w-full mt-4 rounded-lg border border-gray-700"
-              />
-            )}
           </div>
+        </div>
+      </div>
+
+      {/* Área de carga - Mitad derecha (orden invertido) */}
+      <div className="w-full md:w-1/2 h-96 md:h-auto flex items-center justify-center p-8 bg-gray-900 order-2 md:order-2">
+        <div className="w-full h-full max-w-2xl flex items-center justify-center border-2 border-dashed border-gray-600 rounded-lg overflow-hidden">
+          {selectedVideo ? (
+            <video ref={videoRef} src={selectedVideo} className="w-full h-full object-contain" controls />
+          ) : (
+            <div className="text-center p-4">
+              <p className="text-gray-400 mb-4">Selecciona un video para analizar</p>
+              <button 
+                onClick={() => fileInputRef.current.click()}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white"
+              >
+                Seleccionar archivo
+              </button>
+              <input 
+                ref={fileInputRef}
+                type="file" 
+                accept="video/*" 
+                className="hidden" 
+                onChange={handleVideoUpload} 
+              />
+            </div>
+          )}
         </div>
       </div>
     </section>
   );
 };
 
-export default WebcamSection;
+export default VideoSection;

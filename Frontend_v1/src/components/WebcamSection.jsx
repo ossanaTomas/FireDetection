@@ -10,7 +10,6 @@ const WebcamSection = ({ sectionRef }) => {
   const [resolution, setResolution] = useState("720p");
   const [outputUrl, setOutputUrl] = useState(null);
 
-
   const resolutionMap = {
     "240p": { width: 426, height: 240 },
     "360p": { width: 640, height: 360 },
@@ -21,8 +20,10 @@ const WebcamSection = ({ sectionRef }) => {
 
   const startWebcam = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      videoRef.current.srcObject = stream;
+      const { width, height } = resolutionMap[resolution];
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width, height }
+      });
       streamRef.current = stream;
       setIsActive(true);
     } catch (err) {
@@ -31,9 +32,16 @@ const WebcamSection = ({ sectionRef }) => {
     }
   };
 
+  useEffect(() => {
+    if (isActive && streamRef.current && videoRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [isActive]);
+
   const stopWebcam = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
       setIsActive(false);
     }
   };

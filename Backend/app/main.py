@@ -21,7 +21,7 @@ from app.detector import FireDetector
 
 
 app = FastAPI(title="Fire Detector Backend")
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 fire_detector = FireDetector("modelos/best60epocas.pt")
 
