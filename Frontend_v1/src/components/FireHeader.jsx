@@ -6,8 +6,6 @@ const FireHeader = () => {
       <div className="container mx-auto flex justify-between items-center">
         <h1 className="text-2xl font-bold">FireDetector AI</h1>
         <div className="flex items-center space-x-4">
-          <span className="px-3 py-1 bg-red-500 rounded-full text-xs font-semibold">LIVE</span>
-          <button className="text-sm hover:text-red-300 transition-colors">Docs</button>
         </div>
       </div>
     </header>

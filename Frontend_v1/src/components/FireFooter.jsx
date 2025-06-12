@@ -10,9 +10,6 @@ const FireFooter = () => {
             <p className="text-sm">Detección de incendios con inteligencia artificial</p>
           </div>
           <div className="flex space-x-6">
-            <a href="#" className="hover:text-white transition-colors">Documentación</a>
-            <a href="#" className="hover:text-white transition-colors">API</a>
-            <a href="#" className="hover:text-white transition-colors">Contacto</a>
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
