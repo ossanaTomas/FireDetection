@@ -5,6 +5,7 @@ const VideoSection = ({ sectionRef }) => {
   const [videoFile, setVideoFile] = useState(null);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
   const [processedVideoUrl, setProcessedVideoUrl] = useState(null);
   const videoRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -88,7 +89,7 @@ const VideoSection = ({ sectionRef }) => {
           <div className="max-w-md w-full space-y-6">
             <h2 className="text-3xl font-bold text-white">Detectar Fuego en Video</h2>
             <p className="text-gray-300">
-              Sube un video para detectar posibles incendios usando IA. El sistema analizará cada frame y marcará las detecciones.
+              Sube un video para detectar posibles incendios. El sistema analizará cada frame y marcará las detecciones.
             </p>
             
             <div className="space-y-4">

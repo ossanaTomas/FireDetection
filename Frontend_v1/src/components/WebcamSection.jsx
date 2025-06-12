@@ -127,31 +127,6 @@ const WebcamSection = ({ sectionRef }) => {
 
       <div className="w-full md:w-1/2 p-8 flex flex-col items-center justify-center space-y-4">
         <h2 className="text-xl font-bold text-white">Detección en tiempo real</h2>
-
-        <label className="text-white">
-          Confianza: <span className="text-blue-400">{confidence.toFixed(2)}</span>
-        </label>
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={confidence}
-          onChange={(e) => setConfidence(parseFloat(e.target.value))}
-          className="w-full"
-        />
-
-        <label className="text-white">Resolución:</label>
-        <select
-          value={resolution}
-          onChange={(e) => setResolution(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg bg-gray-700 text-white"
-        >
-          {Object.keys(resolutionMap).map((res) => (
-            <option key={res} value={res}>{res}</option>
-          ))}
-        </select>
-
         {resultUrl && (
           <div className="w-full mt-4">
             <h3 className="text-white mb-2">Resultado:</h3>

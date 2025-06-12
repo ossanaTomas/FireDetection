@@ -75,7 +75,7 @@ const ImageSection = ({ sectionRef }) => {
         <div className="max-w-md w-full space-y-6">
           <h2 className="text-2xl font-bold text-white">Analizar Imagen</h2>
           <p className="text-gray-300">
-            Sube una imagen para detectar posibles incendios usando nuestro modelo de IA avanzado.
+            Sube una imagen para detectar posibles incendios.
           </p>
           
           <div className="space-y-4">

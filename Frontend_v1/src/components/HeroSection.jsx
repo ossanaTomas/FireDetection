@@ -10,7 +10,8 @@ const HeroSection = ({ scrollToSection }) => {
         className="absolute inset-0 w-full h-full object-cover"
       />
       <div className="relative z-10 text-center px-4">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-8">Detector de Incendios con IA</h1>
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-8">Fire detection 🔥 </h1>
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-8"></h1>
         <div className="flex flex-col md:flex-row justify-center gap-4">
           <button 
             onClick={() => scrollToSection('image-section')}
