@@ -136,141 +136,17 @@ async def websocket_endpoint(websocket: WebSocket):
         frame = cv2.imdecode(np_data, cv2.IMREAD_COLOR)
 
         # Procesar con YOLO
-        detections = fire_detector.predict(frame)
+        detections = fire_detector.predict(frame, conf=0.45)
         # Codificar imagen de nuevo para enviar
         _, buffer = cv2.imencode('.jpg', detections)
         await websocket.send_bytes(buffer.tobytes())
 
 
 
-@app.post("/predict/video/mjpeg/")
-def predict_video_mjpeg(file: UploadFile = File(...)):
-    # Guardamos temporalmente el archivo
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
-        tmp.write(file.file.read())
-        tmp_path = tmp.name
-
-    def generate():
-        cap = cv2.VideoCapture(tmp_path)
-        detector = fire_detector
-
-        try:
-            while cap.isOpened():
-                ret, frame = cap.read()
-                if not ret:
-                    break
-
-                detections = fire_detector.predict(frame)
 
 
-                _, jpeg = cv2.imencode('.jpg', detections)
-                frame_bytes = jpeg.tobytes()
-
-                yield (
-                    b"--frame\r\n"
-                    b"Content-Type: image/jpeg\r\n\r\n" +
-                    frame_bytes +
-                    b"\r\n"
-                )
-        except Exception as e:
-            print("Error en streaming MJPEG:", e)
-        finally:
-            cap.release()
-
-    return StreamingResponse(
-    generate(),
-    media_type="multipart/x-mixed-replace; boundary=frame",
-    headers={"Content-Disposition": "inline; filename=stream.mjpeg"}
-)
-
-
-@app.post("/stream_video/")
-async def stream_video(file: UploadFile = File(...)):
-    try:
-        
-        contents = await file.read()
-        input_buffer = io.BytesIO(contents)
-        container = av.open(input_buffer)
-        stream = container.streams.video[0]
-
-        def generate_frames():
-            for packet in container.demux(stream):
-                for frame in packet.decode():
-                    frame_np = frame.to_ndarray(format="bgr24")
-                    frame_resized = cv2.resize(frame_np, (416, 416))
-                    detections = fire_detector.predict(frame_resized, imgsz=416, conf=0.5)
-                    frame_annotated = fire_detector.draw_detections(frame_resized, detections)
-                    _, buffer = cv2.imencode('.jpg', frame_annotated)
-                    yield (b'--frame\r\n'
-                           b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
-            container.close()
-
-        return StreamingResponse(
-            generate_frames(),
-            media_type="multipart/x-mixed-replace; boundary=frame"
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al procesar video: {str(e)}")
 #Para poner a correr el backend:
 #desde la carpeta backend: uvicorn app.main:app --port 8001 --reload
 #para correr el front:
 #desde src: npm run dev 
 
-
-'''
-@app.post("/predict/videooo/")
-def predict_video(file: UploadFile = File(...)):
-    try:
-        # Leer el video en memoria
-        print("comenzando a leer video")
-        incio=time.time()
-        contents = file.file.read()
-        fin=time.time()
-        print("fin lectura",fin-incio)
-        input_buffer = io.BytesIO(contents)
-        container = av.open(input_buffer)
-        stream = container.streams.video[0]
-        # Configurar salida en memoria como MP4
-        
-        output_buffer = io.BytesIO()
-        out = av.open(output_buffer, 'w', format='mp4')
-        out_stream = out.add_stream(codec_name="libx264")  # Usar H.264
-        out_stream.width = int(stream.width)  # Ancho del stream de entrada
-        out_stream.height = int(stream.height)  # Alto del stream de entrada
-        out_stream.pix_fmt = "yuv420p"  # Formato de píxeles compatible con H.264
-        print("fin configuraciones", time.time())
-
-    # esto deberia ser pasado desde el front como parametro
-    #pero al reducir la cantidad de frames se
-        frame_count = 0
-        sample_rate = 5  # Procesar 1 de cada 5 frames
-        incio=time.time()
-        for packet in container.demux(stream):
-            for frame in packet.decode():
-                # Convertir frame de AV a OpenCV
-                frame_np = frame.to_ndarray(format="bgr24")
-                frame_resized = cv2.resize(frame_np, (416, 416))
-
-                # Predicción y dibujo
-                detections = fire_detector.predict(frame_resized, imgsz=416, conf=0.25)
-
-                # Convertir de vuelta a AV frame
-                new_frame = av.VideoFrame.from_ndarray(detections, format="bgr24")
-                for packet_out in out_stream.encode(new_frame):
-                    out.mux(packet_out)
-
-        # Finalizar codificación
-        fin=time.time()
-        print("fin prediccion de video",fin-incio)
-        for packet_out in out_stream.encode(None):  # Flush encoder
-            out.mux(packet_out)
-
-        out.close()
-        container.close()
-        # Preparar respuesta
-        output_buffer.seek(0)
-        return StreamingResponse(output_buffer, media_type="video/mp4")
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al procesar video: {str(e)}")
-    '''
