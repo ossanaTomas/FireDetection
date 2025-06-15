@@ -114,7 +114,7 @@ const VideoSection = ({ sectionRef }) => {
 
               <div>
                 <label className="text-white block mb-2">
-                  Frames a procesar: <span className="text-blue-400 font-mono">{frameCount}</span>
+                  Tasa de muestreo: <span className="text-blue-400 font-mono">{frameCount}</span>
                 </label>
                 <input
                   type="range"

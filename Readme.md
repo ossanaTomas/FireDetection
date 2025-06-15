@@ -1,3 +1,6 @@
+
+
+
 # Para instalar el backend
 ## Desde la raiz: 
 * python3 -m venv venv
